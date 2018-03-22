@@ -16,7 +16,8 @@ typedef struct _image {
 int max(int a, int b) {
     if (a > b)
         return a;
-    return b;
+    else
+        return b;
 }
 
 int samePixel (Pixel p1, Pixel p2) {
@@ -24,7 +25,22 @@ int samePixel (Pixel p1, Pixel p2) {
         p1.g == p2.g &&
         p1.b == p2.b)
         return 1;
-    return 0;
+    else
+        return 0;
+}
+
+int minorHeightBlur(int h, int blurSize, int row) {
+  if (h - 1 > row + blurSize/2)
+    return row + blurSize/2;
+  else
+    return h - 1;
+}
+
+int minWeightBlur(int w, int blurSize, int column) {
+  if (w - 1 > column + blurSize/2)
+    return column + blurSize/2;
+  else
+    return w - 1;
 }
 
 Image greyScale(Image img) {
@@ -72,40 +88,38 @@ Image cropImage(Image img, int x, int y, int w, int h) {
     return cropped;
 }
 
-void blur(unsigned int h, unsigned short int pixel[512][512][3], int T, unsigned int w) {
-    for (unsigned int i = 0; i < h; ++i) {
-        for (unsigned int j = 0; j < w; ++j) {
+void blur (Image img, int blurSize) {
+    for (unsigned int row = 0; row < img.h; ++row) {
+        for (unsigned int column = 0; column < img.w; ++column) {
             Pixel media = {0, 0, 0};
 
-            int menor_h = (h - 1 > i + T/2) ? i + T/2 : h - 1;
-            int min_w = (w - 1 > j + T/2) ? j + T/2 : w - 1;
-            for(int x = (0 > i - T/2 ? 0 : i - T/2); x <= menor_h; ++x) {
-                for(int y = (0 > j - T/2 ? 0 : j - T/2); y <= min_w; ++y) {
-                    media.r += pixel[x][y][0];
-                    media.g += pixel[x][y][1];
-                    media.b += pixel[x][y][2];
+            int minorHeight = minorHeightBlur (img.h, blurSize, row);
+            int minWeigh = minWeightBlur (img.w, blurSize, column);
+
+            for(int x = (0 > row - blurSize/2 ? 0 : row - blurSize/2); x <= minorHeight; ++x) {
+                for(int y = (0 > column - blurSize/2 ? 0 : column - blurSize/2); y <= minWeigh; ++y) {
+                    //media.r += pixel[row][column][0];
+                    //media.g += pixel[row][column][1];
+                    //media.b += pixel[row][column][2];
                 }
             }
+            media.r /= blurSize * blurSize;
+            media.g /= blurSize * blurSize;
+            media.b /= blurSize * blurSize;
 
-            // printf("%u", media.r)
-            media.r /= T * T;
-            media.g /= T * T;
-            media.b /= T * T;
-
-            pixel[i][j][0] = media.r;
-            pixel[i][j][1] = media.g;
-            pixel[i][j][2] = media.b;
+            //pixel[row][column][0] = media.r;
+            //pixel[row][column][1] = media.g;
+            //pixel[row][column][2] = media.b;
         }
     }
 }
 
-void colorInversion(unsigned short int pixel[512][512][3],
-                    unsigned int w, unsigned int h) {
-    for (unsigned int i = 0; i < h; ++i) {
-        for (unsigned int j = 0; j < w; ++j) {
-            pixel[i][j][0] = 255 - pixel[i][j][0];
-            pixel[i][j][1] = 255 - pixel[i][j][1];
-            pixel[i][j][2] = 255 - pixel[i][j][2];
+void colorInversion(Image img) {
+    for (unsigned int i = 0; i < img.h; ++i) {
+        for (unsigned int j = 0; j < img.w; ++j) {
+            img.pixel[i][j][0] = 255 - img.pixel[i][j][0];
+            img.pixel[i][j][1] = 255 - img.pixel[i][j][1];
+            img.pixel[i][j][2] = 255 - img.pixel[i][j][2];
         }
     }
 }
@@ -121,6 +135,7 @@ int main() {
     // read width height and color of image
     int max_color;
     scanf("%u %u %d", &img.w, &img.h, &max_color);
+
 
     // read all pixels of image
     for (unsigned int i = 0; i < img.h; ++i) {
@@ -171,7 +186,7 @@ int main() {
             case 3: { // Blur
                 int size = 0;
                 scanf("%d", &size);
-                blur(img.h, img.pixel, size, img.w);
+                blur(img, size);
                 break;
             }
             case 4: { // Rotacao
@@ -216,7 +231,7 @@ int main() {
                 break;
             }
             case 6: { // Inversao de Cores
-                colorInversion(img.pixel, img.w, img.h);
+                colorInversion(img);
                 break;
             }
             case 7: { // Cortar Imagem
