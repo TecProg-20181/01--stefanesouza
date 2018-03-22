@@ -7,7 +7,7 @@ typedef struct _pixel {
 } Pixel;
 
 typedef struct _image {
-    unsigned short int pixel[512][512][3];
+    Pixel pixel[512][512];
     unsigned int w;
     unsigned int h;
 } Image;
@@ -46,11 +46,11 @@ int minWeightBlur(int w, int blurSize, int column) {
 Image greyScale(Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
-            int media = img.pixel[i][j][0] + img.pixel[i][j][1] + img.pixel[i][j][2];
+            int media = img.pixel[i][j].r + img.pixel[i][j].g + img.pixel[i][j].b;
             media /= 3;
-            img.pixel[i][j][0] = media;
-            img.pixel[i][j][1] = media;
-            img.pixel[i][j][2] = media;
+            img.pixel[i][j].r = media;
+            img.pixel[i][j].g = media;
+            img.pixel[i][j].b = media;
         }
     }
     return img;
@@ -64,9 +64,9 @@ Image rotate90(Image img) {
 
   for (unsigned int i = 0, y = 0; i < rotation.h; ++i, ++y) {
     for (int j = rotation.w - 1, x = 0; j >= 0; --j, ++x) {
-      rotation.pixel[i][j][0] = img.pixel[x][y][0];
-      rotation.pixel[i][j][1] = img.pixel[x][y][1];
-      rotation.pixel[i][j][2] = img.pixel[x][y][2];
+      rotation.pixel[i][j].r = img.pixel[x][y].r;
+      rotation.pixel[i][j].g = img.pixel[x][y].g;
+      rotation.pixel[i][j].b = img.pixel[x][y].b;
     }
   }
   return rotation;
@@ -80,9 +80,9 @@ Image cropImage(Image img, int x, int y, int w, int h) {
 
     for(int i = 0; i < h; ++i) {
         for(int j = 0; j < w; ++j) {
-            cropped.pixel[i][j][0] = img.pixel[i + y][j + x][0];
-            cropped.pixel[i][j][1] = img.pixel[i + y][j + x][1];
-            cropped.pixel[i][j][2] = img.pixel[i + y][j + x][2];
+            cropped.pixel[i][j].r = img.pixel[i + y][j + x].r;
+            cropped.pixel[i][j].g = img.pixel[i + y][j + x].g;
+            cropped.pixel[i][j].b = img.pixel[i + y][j + x].b;
         }
     }
     return cropped;
@@ -98,18 +98,18 @@ void blur (Image img, int blurSize) {
 
             for(int x = (0 > row - blurSize/2 ? 0 : row - blurSize/2); x <= minorHeight; ++x) {
                 for(int y = (0 > column - blurSize/2 ? 0 : column - blurSize/2); y <= minWeigh; ++y) {
-                    //media.r += pixel[row][column][0];
-                    //media.g += pixel[row][column][1];
-                    //media.b += pixel[row][column][2];
+                    media.r += img.pixel[row][column].r;
+                    media.g += img.pixel[row][column].g;
+                    media.b += img.pixel[row][column].b;
                 }
             }
             media.r /= blurSize * blurSize;
             media.g /= blurSize * blurSize;
             media.b /= blurSize * blurSize;
 
-            //pixel[row][column][0] = media.r;
-            //pixel[row][column][1] = media.g;
-            //pixel[row][column][2] = media.b;
+            img.pixel[row][column].r = media.r;
+            img.pixel[row][column].g = media.g;
+            img.pixel[row][column].b = media.b;
         }
     }
 }
@@ -117,15 +117,17 @@ void blur (Image img, int blurSize) {
 void colorInversion(Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
-            img.pixel[i][j][0] = 255 - img.pixel[i][j][0];
-            img.pixel[i][j][1] = 255 - img.pixel[i][j][1];
-            img.pixel[i][j][2] = 255 - img.pixel[i][j][2];
+            img.pixel[i][j].r = 255 - img.pixel[i][j].r;
+            img.pixel[i][j].g = 255 - img.pixel[i][j].g;
+            img.pixel[i][j].b = 255 - img.pixel[i][j].b;
         }
     }
 }
 
 
+
 int main() {
+  /*
     Image img;
 
     // read type of image
@@ -263,4 +265,5 @@ int main() {
         printf("\n");
     }
     return 0;
+    */
 }
