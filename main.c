@@ -78,7 +78,11 @@ Image sepiaFilter(Image img) {
   return img;
 }
 
-Image blur (Image img, int blurSize) {
+Image blur (Image img) {
+    int blurSize = 0;
+    printf("Size: \n");
+    scanf("%d", &blurSize);
+
     for (unsigned int row = 0; row < img.h; ++row) {
         for (unsigned int column = 0; column < img.w; ++column) {
             Pixel average = {0, 0, 0};
@@ -121,8 +125,11 @@ Image rotate90(Image img) {
   return rotation;
 }
 
-Image mirroried (Image img, int horizontal) {
+Image mirroried (Image img) {
   Image mirrored;
+  int horizontal = 0;
+  scanf("%d", &horizontal);
+
   int w = mirrored.w, h = mirrored.h;
   (horizontal == 1) ? (w /= 2) : (h /= 2);
 
@@ -160,8 +167,13 @@ Image colorInversion(Image img) {
     return img;
 }
 
-Image cropImage(Image img, int x, int y, int w, int h) {
+Image cropImage(Image img) {
     Image cropped;
+    int x, y, w, h;
+
+    scanf("%d %d", &x, &y);
+    scanf("%d %d", &w, &h);
+
     cropped.w = w;
     cropped.h = h;
 
@@ -206,6 +218,8 @@ int main() {
     int nOptions;
     scanf("%d", &nOptions);
 
+    printf("1. Grey Scale\n2. Sepia\n3. Blur\n4. Rotation\n5. Mirroried\n6. Color Inversion\n7. Crop Image\n");
+
     for(int i = 0; i < nOptions; ++i) {
         int option;
         scanf("%d", &option);
@@ -216,14 +230,11 @@ int main() {
                 break;
             }
             case 2: { // Sepia Filter
-
-
+              img = sepiaFilter(img);
                 break;
             }
             case 3: { // Blur
-                int size = 0;
-                scanf("%d", &size);
-                blur(img, size);
+                img = blur(img);
                 break;
             }
             case 4: { // Rotation
@@ -236,23 +247,15 @@ int main() {
                 break;
             }
             case 5: { // Mirroried
-                int horizontal = 0;
-                scanf("%d", &horizontal);
-
-                mirroried(img, horizontal);
+                img = mirroried(img);
                 break;
             }
             case 6: { // Color Inversion
-                colorInversion(img);
+                img = colorInversion(img);
                 break;
             }
             case 7: { // Crop Image
-                int x, y, w, h;
-
-                scanf("%d %d", &x, &y);
-                scanf("%d %d", &w, &h);
-
-                img = cropImage(img, x, y, w, h);
+                img = cropImage(img);
                 break;
             }
         }
