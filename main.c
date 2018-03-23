@@ -56,36 +56,27 @@ Image greyScale(Image img) {
     return img;
 }
 
-Image rotate90(Image img) {
-  Image rotation;
+Image sepiaFilter(Image img) {
+  for (unsigned int x = 0; x < img.h; ++x) {
+      for (unsigned int j = 0; j < img.w; ++j) {
+          unsigned short int pixel[3];
+          pixel[0] = img.pixel[x][j].r;
+          pixel[1] = img.pixel[x][j].g;
+          pixel[2] = img.pixel[x][j].b;
 
-  rotation.w = img.h;
-  rotation.h = img.w;
+          int p =  pixel[0] * .393 + pixel[1] * .769 + pixel[2] * .189;
+          int menor_r = (255 >  p) ? p : 255;
+          img.pixel[x][j].r = menor_r;
 
-  for (unsigned int i = 0, y = 0; i < rotation.h; ++i, ++y) {
-    for (int j = rotation.w - 1, x = 0; j >= 0; --j, ++x) {
-      rotation.pixel[i][j].r = img.pixel[x][y].r;
-      rotation.pixel[i][j].g = img.pixel[x][y].g;
-      rotation.pixel[i][j].b = img.pixel[x][y].b;
-    }
+          p =  pixel[0] * .349 + pixel[1] * .686 + pixel[2] * .168;
+          menor_r = (255 >  p) ? p : 255;
+          img.pixel[x][j].g = menor_r;
+
+          p =  pixel[0] * .272 + pixel[1] * .534 + pixel[2] * .131;
+          menor_r = (255 >  p) ? p : 255;
+          img.pixel[x][j].b = menor_r;
+      }
   }
-  return rotation;
-}
-
-Image cropImage(Image img, int x, int y, int w, int h) {
-    Image cropped;
-
-    cropped.w = w;
-    cropped.h = h;
-
-    for(int i = 0; i < h; ++i) {
-        for(int j = 0; j < w; ++j) {
-            cropped.pixel[i][j].r = img.pixel[i + y][j + x].r;
-            cropped.pixel[i][j].g = img.pixel[i + y][j + x].g;
-            cropped.pixel[i][j].b = img.pixel[i + y][j + x].b;
-        }
-    }
-    return cropped;
 }
 
 void blur (Image img, int blurSize) {
@@ -114,6 +105,57 @@ void blur (Image img, int blurSize) {
     }
 }
 
+Image rotate90(Image img) {
+  Image rotation;
+
+  rotation.w = img.h;
+  rotation.h = img.w;
+
+  for (unsigned int i = 0, y = 0; i < rotation.h; ++i, ++y) {
+    for (int j = rotation.w - 1, x = 0; j >= 0; --j, ++x) {
+      rotation.pixel[i][j].r = img.pixel[x][y].r;
+      rotation.pixel[i][j].g = img.pixel[x][y].g;
+      rotation.pixel[i][j].b = img.pixel[x][y].b;
+    }
+  }
+  return rotation;
+}
+
+Image mirroried (Image img, int horizontal) {
+  Image mirrored;
+  int w = mirrored.w, h = mirrored.h;
+
+  if (horizontal == 1)
+    w /= 2;
+  else
+    h /= 2;
+
+  for (int i2 = 0; i2 < h; ++i2) {
+      for (int j = 0; j < w; ++j) {
+          int x = i2, y = j;
+
+          if (horizontal == 1)
+            y = mirrored.w - 1 - j;
+          else
+            x = mirrored.h - 1 - i2;
+
+          Pixel aux1;
+          aux1.r = mirrored.pixel[i2][j].r;
+          aux1.g = mirrored.pixel[i2][j].g;
+          aux1.b = mirrored.pixel[i2][j].b;
+
+          mirrored.pixel[i2][j].r = mirrored.pixel[x][y].r;
+          mirrored.pixel[i2][j].g = mirrored.pixel[x][y].g;
+          mirrored.pixel[i2][j].b = mirrored.pixel[x][y].b;
+
+          mirrored.pixel[x][y].r = aux1.r;
+          mirrored.pixel[x][y].g = aux1.g;
+          mirrored.pixel[x][y].b = aux1.b;
+      }
+  }
+  return mirrored;
+}
+
 void colorInversion(Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
@@ -122,6 +164,22 @@ void colorInversion(Image img) {
             img.pixel[i][j].b = 255 - img.pixel[i][j].b;
         }
     }
+}
+
+Image cropImage(Image img, int x, int y, int w, int h) {
+    Image cropped;
+
+    cropped.w = w;
+    cropped.h = h;
+
+    for(int i = 0; i < h; ++i) {
+        for(int j = 0; j < w; ++j) {
+            cropped.pixel[i][j].r = img.pixel[i + y][j + x].r;
+            cropped.pixel[i][j].g = img.pixel[i + y][j + x].g;
+            cropped.pixel[i][j].b = img.pixel[i + y][j + x].b;
+        }
+    }
+    return cropped;
 }
 
 
@@ -156,26 +214,7 @@ int main() {
                 break;
             }
             case 2: { // Sepia Filter
-                for (unsigned int x = 0; x < img.h; ++x) {
-                    for (unsigned int j = 0; j < img.w; ++j) {
-                        unsigned short int pixel[3];
-                        pixel[0] = img.pixel[x][j].r;
-                        pixel[1] = img.pixel[x][j].g;
-                        pixel[2] = img.pixel[x][j].b;
 
-                        int p =  pixel[0] * .393 + pixel[1] * .769 + pixel[2] * .189;
-                        int menor_r = (255 >  p) ? p : 255;
-                        img.pixel[x][j].r = menor_r;
-
-                        p =  pixel[0] * .349 + pixel[1] * .686 + pixel[2] * .168;
-                        menor_r = (255 >  p) ? p : 255;
-                        img.pixel[x][j].g = menor_r;
-
-                        p =  pixel[0] * .272 + pixel[1] * .534 + pixel[2] * .131;
-                        menor_r = (255 >  p) ? p : 255;
-                        img.pixel[x][j].b = menor_r;
-                    }
-                }
 
                 break;
             }
@@ -198,32 +237,7 @@ int main() {
                 int horizontal = 0;
                 scanf("%d", &horizontal);
 
-                int w = img.w, h = img.h;
-
-                if (horizontal == 1) w /= 2;
-                else h /= 2;
-
-                for (int i2 = 0; i2 < h; ++i2) {
-                    for (int j = 0; j < w; ++j) {
-                        int x = i2, y = j;
-
-                        if (horizontal == 1) y = img.w - 1 - j;
-                        else x = img.h - 1 - i2;
-
-                        Pixel aux1;
-                        aux1.r = img.pixel[i2][j].r;
-                        aux1.g = img.pixel[i2][j].g;
-                        aux1.b = img.pixel[i2][j].b;
-
-                        img.pixel[i2][j].r = img.pixel[x][y].r;
-                        img.pixel[i2][j].g = img.pixel[x][y].g;
-                        img.pixel[i2][j].b = img.pixel[x][y].b;
-
-                        img.pixel[x][y].r = aux1.r;
-                        img.pixel[x][y].g = aux1.g;
-                        img.pixel[x][y].b = aux1.b;
-                    }
-                }
+                mirroried(img, horizontal);
                 break;
             }
             case 6: { // Color Inversion
@@ -244,6 +258,7 @@ int main() {
 
     // Print type of image
     printf("P3\n");
+
     // Print width height and color of image
     printf("%u %u\n255\n", img.w, img.h);
 
