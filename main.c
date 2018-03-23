@@ -21,9 +21,7 @@ int max(int a, int b) {
 }
 
 int samePixel (Pixel p1, Pixel p2) {
-    if (p1.r == p2.r &&
-        p1.g == p2.g &&
-        p1.b == p2.b)
+    if (p1.r == p2.r && p1.g == p2.g && p1.b == p2.b)
         return 1;
     else
         return 0;
@@ -43,66 +41,68 @@ int minWeightBlur(int w, int blurSize, int column) {
     return w - 1;
 }
 
-Image greyScale(Image img) {
+Image greyScale (Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
-            int media = img.pixel[i][j].r + img.pixel[i][j].g + img.pixel[i][j].b;
-            media /= 3;
-            img.pixel[i][j].r = media;
-            img.pixel[i][j].g = media;
-            img.pixel[i][j].b = media;
+            int average = img.pixel[i][j].r + img.pixel[i][j].g + img.pixel[i][j].b;
+            average /= 3;
+            img.pixel[i][j].r = average;
+            img.pixel[i][j].g = average;
+            img.pixel[i][j].b = average;
         }
-    }
+      }
     return img;
 }
 
 Image sepiaFilter(Image img) {
   for (unsigned int x = 0; x < img.h; ++x) {
-      for (unsigned int j = 0; j < img.w; ++j) {
-          unsigned short int pixel[3];
-          pixel[0] = img.pixel[x][j].r;
-          pixel[1] = img.pixel[x][j].g;
-          pixel[2] = img.pixel[x][j].b;
+    for (unsigned int j = 0; j < img.w; ++j) {
+        unsigned short int pixel[3];
+        pixel[0] = img.pixel[x][j].r;
+        pixel[1] = img.pixel[x][j].g;
+        pixel[2] = img.pixel[x][j].b;
 
-          int p =  pixel[0] * .393 + pixel[1] * .769 + pixel[2] * .189;
-          int menor_r = (255 >  p) ? p : 255;
-          img.pixel[x][j].r = menor_r;
+        int p =  pixel[0] * .393 + pixel[1] * .769 + pixel[2] * .189;
+        int menor_r = (255 >  p) ? p : 255;
+        img.pixel[x][j].r = menor_r;
 
-          p =  pixel[0] * .349 + pixel[1] * .686 + pixel[2] * .168;
-          menor_r = (255 >  p) ? p : 255;
-          img.pixel[x][j].g = menor_r;
+        p =  pixel[0] * .349 + pixel[1] * .686 + pixel[2] * .168;
+        menor_r = (255 >  p) ? p : 255;
+        img.pixel[x][j].g = menor_r;
 
-          p =  pixel[0] * .272 + pixel[1] * .534 + pixel[2] * .131;
-          menor_r = (255 >  p) ? p : 255;
-          img.pixel[x][j].b = menor_r;
-      }
+        p =  pixel[0] * .272 + pixel[1] * .534 + pixel[2] * .131;
+        menor_r = (255 >  p) ? p : 255;
+        img.pixel[x][j].b = menor_r;
+    }
   }
+  return img;
 }
 
-void blur (Image img, int blurSize) {
+Image blur (Image img, int blurSize) {
     for (unsigned int row = 0; row < img.h; ++row) {
         for (unsigned int column = 0; column < img.w; ++column) {
-            Pixel media = {0, 0, 0};
+            Pixel average = {0, 0, 0};
 
             int minorHeight = minorHeightBlur (img.h, blurSize, row);
             int minWeigh = minWeightBlur (img.w, blurSize, column);
 
             for(int x = (0 > row - blurSize/2 ? 0 : row - blurSize/2); x <= minorHeight; ++x) {
                 for(int y = (0 > column - blurSize/2 ? 0 : column - blurSize/2); y <= minWeigh; ++y) {
-                    media.r += img.pixel[row][column].r;
-                    media.g += img.pixel[row][column].g;
-                    media.b += img.pixel[row][column].b;
+                    average.r += img.pixel[row][column].r;
+                    average.g += img.pixel[row][column].g;
+                    average.b += img.pixel[row][column].b;
                 }
             }
-            media.r /= blurSize * blurSize;
-            media.g /= blurSize * blurSize;
-            media.b /= blurSize * blurSize;
+            average.r /= blurSize * blurSize;
+            average.g /= blurSize * blurSize;
+            average.b /= blurSize * blurSize;
 
-            img.pixel[row][column].r = media.r;
-            img.pixel[row][column].g = media.g;
-            img.pixel[row][column].b = media.b;
+            img.pixel[row][column].r = average.r;
+            img.pixel[row][column].g = average.g;
+            img.pixel[row][column].b = average.b;
         }
     }
+    return img;
 }
 
 Image rotate90(Image img) {
@@ -124,20 +124,13 @@ Image rotate90(Image img) {
 Image mirroried (Image img, int horizontal) {
   Image mirrored;
   int w = mirrored.w, h = mirrored.h;
-
-  if (horizontal == 1)
-    w /= 2;
-  else
-    h /= 2;
+  (horizontal == 1) ? (w /= 2) : (h /= 2);
 
   for (int i2 = 0; i2 < h; ++i2) {
       for (int j = 0; j < w; ++j) {
           int x = i2, y = j;
 
-          if (horizontal == 1)
-            y = mirrored.w - 1 - j;
-          else
-            x = mirrored.h - 1 - i2;
+          (horizontal == 1) ? (y = mirrored.w - 1 - j) : (x = mirrored.h - 1 - i2);
 
           Pixel aux1;
           aux1.r = mirrored.pixel[i2][j].r;
@@ -156,7 +149,7 @@ Image mirroried (Image img, int horizontal) {
   return mirrored;
 }
 
-void colorInversion(Image img) {
+Image colorInversion(Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
             img.pixel[i][j].r = 255 - img.pixel[i][j].r;
@@ -164,11 +157,11 @@ void colorInversion(Image img) {
             img.pixel[i][j].b = 255 - img.pixel[i][j].b;
         }
     }
+    return img;
 }
 
 Image cropImage(Image img, int x, int y, int w, int h) {
     Image cropped;
-
     cropped.w = w;
     cropped.h = h;
 
@@ -182,6 +175,16 @@ Image cropImage(Image img, int x, int y, int w, int h) {
     return cropped;
 }
 
+void printImageDescription(Image img) {
+  printf("P3\n");
+  printf("%u %u\n255\n", img.w, img.h);
+  for (unsigned int i = 0; i < img.h; ++i) {
+    for (unsigned int j = 0; j < img.w; ++j) {
+        printf("%hu %hu %hu ", img.pixel[i][j].r, img.pixel[i][j].g, img.pixel[i][j].b);
+    }
+    printf("\n");
+  }
+}
 
 int main() {
     Image img;
@@ -190,7 +193,6 @@ int main() {
     char p3[4];
     scanf("%s", p3);
 
-    // Read width height and color of image
     int max_color;
     scanf("%u %u %d", &img.w, &img.h, &max_color);
 
@@ -254,20 +256,6 @@ int main() {
                 break;
             }
         }
-    }
-
-    // Print type of image
-    printf("P3\n");
-
-    // Print width height and color of image
-    printf("%u %u\n255\n", img.w, img.h);
-
-    // Print pixels of image
-    for (unsigned int i = 0; i < img.h; ++i) {
-        for (unsigned int j = 0; j < img.w; ++j) {
-            printf("%hu %hu %hu ", img.pixel[i][j].r, img.pixel[i][j].g, img.pixel[i][j].b);
-        }
-        printf("\n");
     }
     return 0;
 }
