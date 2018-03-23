@@ -13,13 +13,6 @@ typedef struct _image {
 } Image;
 
 
-int max(int a, int b) {
-    if (a > b)
-        return a;
-    else
-        return b;
-}
-
 int samePixel (Pixel p1, Pixel p2) {
     if (p1.r == p2.r && p1.g == p2.g && p1.b == p2.b)
         return 1;
@@ -27,21 +20,16 @@ int samePixel (Pixel p1, Pixel p2) {
         return 0;
 }
 
-int minorHeightBlur(int h, int blurSize, int row) {
-  if (h - 1 > row + blurSize/2)
-    return row + blurSize/2;
-  else
-    return h - 1;
+int max (int numA, int numB) {
+    return (numA > numB) ? numA : numB;
 }
 
-int minWeightBlur(int w, int blurSize, int column) {
-  if (w - 1 > column + blurSize/2)
-    return column + blurSize/2;
-  else
-    return w - 1;
+int min (int numA, int numB) {
+  return (numA < numB) ? numA : numB;
 }
 
-Image greyScale (Image img) {
+
+Image greyScale(Image img) {
     for (unsigned int i = 0; i < img.h; ++i) {
         for (unsigned int j = 0; j < img.w; ++j) {
             int average = img.pixel[i][j].r + img.pixel[i][j].g + img.pixel[i][j].b;
@@ -63,22 +51,22 @@ Image sepiaFilter(Image img) {
         pixel[2] = img.pixel[x][j].b;
 
         int p =  pixel[0] * .393 + pixel[1] * .769 + pixel[2] * .189;
-        int menor_r = (255 >  p) ? p : 255;
-        img.pixel[x][j].r = menor_r;
+        int min_r = min(255, p);
+        img.pixel[x][j].r = min_r;
 
         p =  pixel[0] * .349 + pixel[1] * .686 + pixel[2] * .168;
-        menor_r = (255 >  p) ? p : 255;
-        img.pixel[x][j].g = menor_r;
+        min_r = min(255, p);
+        img.pixel[x][j].g = min_r;
 
         p =  pixel[0] * .272 + pixel[1] * .534 + pixel[2] * .131;
-        menor_r = (255 >  p) ? p : 255;
-        img.pixel[x][j].b = menor_r;
+        min_r = min(255, p);
+        img.pixel[x][j].b = min_r;
     }
   }
   return img;
 }
 
-Image blur (Image img) {
+Image blur(Image img) {
     int blurSize = 0;
     printf("Size: \n");
     scanf("%d", &blurSize);
@@ -87,10 +75,10 @@ Image blur (Image img) {
         for (unsigned int column = 0; column < img.w; ++column) {
             Pixel average = {0, 0, 0};
 
-            int minorHeight = minorHeightBlur (img.h, blurSize, row);
-            int minWeigh = minWeightBlur (img.w, blurSize, column);
+            int minHeight = min((img.h - 1), (row + blurSize/2));
+            int minWeigh = min((img.w - 1), (column + blurSize/2));
 
-            for(int x = (0 > row - blurSize/2 ? 0 : row - blurSize/2); x <= minorHeight; ++x) {
+            for(int x = (0 > row - blurSize/2 ? 0 : row - blurSize/2); x <= minHeight; ++x) {
                 for(int y = (0 > column - blurSize/2 ? 0 : column - blurSize/2); y <= minWeigh; ++y) {
                     average.r += img.pixel[row][column].r;
                     average.g += img.pixel[row][column].g;
@@ -125,9 +113,10 @@ Image rotate90(Image img) {
   return rotation;
 }
 
-Image mirroried (Image img) {
+Image mirroried(Image img) {
   Image mirrored;
   int horizontal = 0;
+  printf("Horizontal: \n");
   scanf("%d", &horizontal);
 
   int w = mirrored.w, h = mirrored.h;
@@ -187,6 +176,22 @@ Image cropImage(Image img) {
     return cropped;
 }
 
+void readImageDescription(Image img) {
+  // Type
+  char p3[4];
+  scanf("%s", p3);
+
+  int max_color;
+  scanf("%u %u %d", &img.w, &img.h, &max_color);
+
+  // Pixels of image
+  for (unsigned int i = 0; i < img.h; ++i) {
+      for (unsigned int j = 0; j < img.w; ++j) {
+          scanf("%hu %hu %hu", &img.pixel[i][j].r, &img.pixel[i][j].g, &img.pixel[i][j].b);
+      }
+  }
+}
+
 void printImageDescription(Image img) {
   printf("P3\n");
   printf("%u %u\n255\n", img.w, img.h);
@@ -198,22 +203,11 @@ void printImageDescription(Image img) {
   }
 }
 
+
 int main() {
     Image img;
 
-    // Read type of image
-    char p3[4];
-    scanf("%s", p3);
-
-    int max_color;
-    scanf("%u %u %d", &img.w, &img.h, &max_color);
-
-    // Read all pixels of image
-    for (unsigned int i = 0; i < img.h; ++i) {
-        for (unsigned int j = 0; j < img.w; ++j) {
-            scanf("%hu %hu %hu", &img.pixel[i][j].r, &img.pixel[i][j].g, &img.pixel[i][j].b);
-        }
-    }
+    readImageDescription(img);
 
     int nOptions;
     scanf("%d", &nOptions);
@@ -260,5 +254,6 @@ int main() {
             }
         }
     }
+    printImageDescription(img);
     return 0;
 }
